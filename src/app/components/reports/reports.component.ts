@@ -11,6 +11,10 @@ import { Asiento, ReporteResumen, Reservacion, Usuario } from "../../models";
 })
 export class ReportsComponent implements OnInit {
   resumen: ReporteResumen | null = null;
+  asientos: Asiento[] = [];
+  showSeatMapModal = false;
+  businessRows = ["I","G","F","D","C","A"];
+  economyRows  = ["I","H","G","F","E","D","C","B","A"];
 
   constructor(private api: ApiService) {}
 
@@ -21,6 +25,7 @@ export class ReportsComponent implements OnInit {
   load() {
     this.api.getUsuarios().subscribe(users => {
       this.api.getAsientos().subscribe(seats => {
+        this.asientos = seats;
         this.api.getReservaciones().subscribe(reservas => {
           this.resumen = this.compute(users, seats, reservas);
         });
@@ -49,4 +54,13 @@ export class ReportsComponent implements OnInit {
 
     return { usuariosCreados, reservasPorUsuario, ocupadosPorClase, libresPorClase, seleccionManual, seleccionAleatorio, modificados, cancelados };
   }
+
+  seatsByRow(row: string, clase: "Negocios" | "Economica") {
+    return this.asientos
+      .filter(a => a.clase === clase && a.numero.startsWith(row))
+      .sort((a,b) => a.numero.localeCompare(b.numero));
+  }
+
+  abrirDiagrama() { this.showSeatMapModal = true; }
+  cerrarDiagrama() { this.showSeatMapModal = false; }
 }

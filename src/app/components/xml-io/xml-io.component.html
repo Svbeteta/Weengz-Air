@@ -6,8 +6,32 @@
       <label class="btn btn-outline-primary mb-0">
         Importar XML <input type="file" accept=".xml" hidden (change)="importar($event)">
       </label>
+      <button class="btn btn-outline-danger ms-2" (click)="abrirPurgar()" title="Eliminar reservaciones y modificaciones (solo pruebas)">Borrar datos (pruebas)</button>
     </div>
     <div *ngIf="resumen" class="alert alert-info">{{resumen}}</div>
     <div *ngIf="processingMs!=null" class="text-muted">Tiempo de procesamiento: {{processingMs}} ms</div>
+  </div>
+</div>
+
+<!-- Modal de confirmación de purga -->
+<div class="modal fade show d-block" tabindex="-1" role="dialog" *ngIf="showPurgeModal" style="background: rgba(0,0,0,.6);">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:520px">
+    <div class="modal-content brand-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger">Borrar datos de prueba</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cancelarPurgar()"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2">Esta acción eliminará todas las reservaciones y modificaciones y liberará los asientos. Los usuarios no se verán afectados.</p>
+        <div class="alert alert-warning">Escribe <strong>BORRAR</strong> para confirmar.</div>
+        <input class="form-control" [(ngModel)]="purgeConfirmText" placeholder="BORRAR" />
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelarPurgar()">Volver</button>
+        <button type="button" class="btn btn-danger" [disabled]="!puedePurgar || isPurging" (click)="confirmarPurgar()">
+          {{ isPurging ? 'Borrando…' : 'Borrar ahora' }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

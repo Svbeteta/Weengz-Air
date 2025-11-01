@@ -411,3 +411,36 @@ paths:
                 properties:
                   ok: { type: boolean }
                   updated: { type: integer }
+  /admin/purge:
+    post:
+      summary: Purga datos de prueba — elimina reservaciones y modificaciones y libera asientos
+      description: |
+        Endpoint de administración para entornos de prueba. Borra todas las reservaciones y sus modificaciones
+        y marca todos los asientos ocupados como libres. No modifica usuarios.
+      responses:
+        '200':
+          description: Purga ejecutada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  before:
+                    type: object
+                    properties:
+                      modificaciones: { type: integer }
+                      reservaciones: { type: integer }
+                      occupiedSeats: { type: integer }
+                  deleted:
+                    type: object
+                    properties:
+                      modificaciones: { type: integer }
+                      reservaciones: { type: integer }
+                      seatsFreed: { type: integer }
+                  after:
+                    type: object
+                    properties:
+                      modificaciones: { type: integer }
+                      reservaciones: { type: integer }
+                      occupiedSeats: { type: integer }

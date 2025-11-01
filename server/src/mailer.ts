@@ -239,26 +239,34 @@ export async function sendReservationCancellationEmail(params: {
     const discountAmount = discountApplied ? Number((precioBase - precioAntesRecargos).toFixed(2)) : 0;
     const discountPct = precioBase > 0 ? Math.round((discountAmount / precioBase) * 100) : 0;
 
-    const lines: string[] = [];
-    lines.push(`<strong>Reserva #${reservation.id}</strong>`);
-    lines.push(`Estado: <strong>${reservation.estado}</strong>`);
-    if (seat) lines.push(`Asiento: <strong>${seat.numero}</strong> (${seat.clase})`);
-    lines.push(`Pasajero: ${reservation.pasajeroNombre} — CUI: ${reservation.pasajeroCui}`);
-    lines.push(`Equipaje: ${reservation.pasajeroEquipaje ? 'Sí' : 'No'}`);
-    lines.push(`Fecha: ${fmt(reservation.fechaReservacion)}`);
-    lines.push(`Método de selección: ${reservation.metodoSeleccion}`);
-    lines.push(`Precio original: Q${precioBase.toFixed(2)}`);
-    if (discountApplied) lines.push(`Descuento aplicado: -Q${discountAmount.toFixed(2)} (${discountPct}%)`);
-    if (recargosTotal > 0) lines.push(`Recargos por modificaciones: +Q${recargosTotal.toFixed(2)}`);
-    lines.push(`<strong>Total pagado: Q${precioTotal.toFixed(2)}</strong>`);
+    // Build a section block matching the batch confirmation visual style
+    const priceLines: string[] = [];
+    priceLines.push(`Precio original: Q${precioBase.toFixed(2)}`);
+    if (discountApplied) priceLines.push(`Descuento: -Q${discountAmount.toFixed(2)} (${discountPct}%)`);
+    if (recargosTotal > 0) priceLines.push(`Recargos: +Q${recargosTotal.toFixed(2)}`);
+    priceLines.push(`<strong>Total: Q${precioTotal.toFixed(2)}</strong>`);
+
+    const sectionHtml = [
+      `<div style="margin:12px 0 16px">`,
+      `<div style="font-weight:600">Asiento ${seat?.numero ?? reservation.asiento} <small style=\"color:#6b7280\">${seat?.clase ?? ''}</small></div>`,
+      `<div style=\"color:#374151\">Pasajero: ${reservation.pasajeroNombre} — CUI: ${reservation.pasajeroCui} — ${reservation.pasajeroEquipaje ? 'Con equipaje' : 'Sin equipaje'}</div>`,
+      `<div style=\"color:#374151\">Fecha: ${fmt(reservation.fechaReservacion)} • Método: ${reservation.metodoSeleccion}</div>`,
+      `<div style=\"margin-top:6px;color:#111827\">${priceLines.join('<br/>')}</div>`,
+      `</div>`
+    ].join('');
+
+    const totalLabel = `<div style=\"margin-top:12px;font-weight:700;color:#111827\">Total cancelado: Q${precioTotal.toFixed(2)}</div>`;
 
     const subject = `Cancelación de reserva #${reservation.id}`;
     const html = brandTemplate({
       title: 'Reservación cancelada',
       greeting: `Hola ${userName || 'viajero'},`,
-      paragraphs: [lines.join('<br/>'), 'Tu asiento ha sido liberado y la reservación ha sido cancelada. Si corresponde, revisa el estado de reembolso en tu cuenta.'],
+      paragraphs: [
+        `<div style=\"color:#374151\">Hemos cancelado la siguiente reservación:</div>`,
+        sectionHtml + totalLabel
+      ],
       cta: { label: 'Ver mis reservas', href: `${frontendUrl}/reservations` },
-      footerNote: 'Si no solicitaste esta cancelación, contacta soporte.' ,
+      footerNote: 'Si no solicitaste esta cancelación, contacta soporte.',
       logoCid: fs.existsSync(logoPathResolved) ? 'logo@weengz' : undefined
     });
 

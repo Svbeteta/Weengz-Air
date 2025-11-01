@@ -61,6 +61,11 @@ export class ApiService {
     return this.http.post<{ok:boolean, updated:number}>(`${this.base}/reservaciones/confirmar-lote`, { ids });
   }
 
+  // Admin tools
+  purgarDatos() {
+    return this.http.post<{ ok: boolean; before: any; deleted: any; after: any }>(`${this.base}/admin/purge`, {});
+  }
+
   // Helpers
   getReservasPorUsuario(email: string): Observable<Reservacion[]> {
     return this.getReservaciones().pipe(map(rs => rs.filter(r => r.usuario === email)));

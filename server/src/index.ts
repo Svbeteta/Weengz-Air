@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { sendUserCreatedEmail, sendReservationConfirmationEmail,  sendReservationCancellationEmail, sendReservationsBatchConfirmationEmail } from './mailer';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
@@ -28,6 +28,42 @@ try {
 } catch (e) {
   console.warn('OpenAPI spec not found or invalid. Skipping Swagger UI.');
 }
+
+// Admin: purge reservations/modifications and free seats (for testing)
+app.post('/admin/purge', async (_req, res) => {
+  try {
+    const [modsBefore, resBefore, busyBefore] = await Promise.all([
+      prisma.modificacion.count(),
+      prisma.reservacion.count(),
+      prisma.asiento.count({ where: { estado: 'Ocupado' } })
+    ]);
+
+    const results = await prisma.$transaction([
+      prisma.modificacion.deleteMany({}),
+      prisma.reservacion.deleteMany({}),
+      prisma.asiento.updateMany({ where: { estado: 'Ocupado' }, data: { estado: 'Libre' } }),
+    ]);
+
+    const modsDel = (results[0] as any)?.count ?? 0;
+    const resDel = (results[1] as any)?.count ?? 0;
+    const seatsFreed = (results[2] as any)?.count ?? 0;
+
+    const [modsAfter, resAfter, busyAfter] = await Promise.all([
+      prisma.modificacion.count(),
+      prisma.reservacion.count(),
+      prisma.asiento.count({ where: { estado: 'Ocupado' } })
+    ]);
+
+    res.json({
+      ok: true,
+      before: { modificaciones: modsBefore, reservaciones: resBefore, occupiedSeats: busyBefore },
+      deleted: { modificaciones: modsDel, reservaciones: resDel, seatsFreed },
+      after: { modificaciones: modsAfter, reservaciones: resAfter, occupiedSeats: busyAfter }
+    });
+  } catch (e: any) {
+    res.status(500).json({ ok: false, message: e.message || 'No se pudo purgar' });
+  }
+});
 
 // Usuarios
 app.get('/usuarios', async (_req, res) => {
@@ -72,7 +108,7 @@ app.patch('/asientos/:id', async (req, res) => {
 // Reservaciones
 app.get('/reservaciones', async (_req, res) => {
   const rs = await prisma.reservacion.findMany({ include: { Modificaciones: true }, orderBy: { id: 'asc' } });
-  res.json(rs.map(r => ({
+  res.json(rs.map((r: any) => ({
     id: r.id,
     estado: r.estado,
     usuario: r.usuario,
@@ -128,7 +164,7 @@ app.delete('/reservaciones/:id', async (req, res) => {
 app.post('/reservaciones/atomic', async (req, res) => {
   const r = req.body;
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const seat = await tx.asiento.findUnique({ where: { id: r.asiento } });
       if (!seat) throw new Error('Asiento no existe');
       if (seat.estado === 'Ocupado') throw new Error('Asiento ocupado');
@@ -175,7 +211,7 @@ app.post('/reservaciones/:id/modificar', async (req, res) => {
   const id = Number(req.params.id);
   const { nuevoAsiento, descripcion, cui } = req.body as { nuevoAsiento: string; descripcion?: string; cui?: string };
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const r = await tx.reservacion.findUnique({ where: { id } });
       if (!r) throw new Error('Reservación no existe');
       // Validate CUI matches reservation
@@ -231,7 +267,7 @@ app.post('/reservaciones/:id/cancelar', async (req, res) => {
   const id = Number(req.params.id);
   const { cui } = req.body as { cui?: string };
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const r = await tx.reservacion.findUnique({ where: { id }, include: { Modificaciones: true } });
       if (!r) throw new Error('Reservación no existe');
       // Validate CUI matches reservation
@@ -312,7 +348,7 @@ app.post('/reservaciones/confirmar-lote', async (req, res) => {
   const ids: number[] = req.body.ids;
   if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: 'ids required' });
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const collected: Array<{ reservation: any; seat?: any; modificaciones?: any[] }> = [];
       let userEmail: string | undefined = undefined;
       let userName: string | undefined = undefined;

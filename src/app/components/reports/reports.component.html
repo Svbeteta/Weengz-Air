@@ -1,18 +1,21 @@
-﻿<h3 class="mb-3">Reportes</h3>
+﻿<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Reportes</h3>
+  <button class="btn btn-outline-primary" (click)="abrirDiagrama()">Ver diagrama de asientos</button>
+  </div>
 <div class="card shadow-sm" *ngIf="resumen; else loading">
   <div class="card-body">
     <div class="row g-3">
       <div class="col-md-4">
         <div class="p-3 border rounded">
           <div class="fw-bold">Usuarios creados</div>
-          <div class="display-6">{{resumen?.usuariosCreados}}</div>
+          <div class="display-6">{{resumen.usuariosCreados}}</div>
         </div>
       </div>
       <div class="col-md-8">
         <div class="p-3 border rounded">
           <div class="fw-bold mb-2">Reservas por usuario</div>
           <ul class="mb-0">
-            <li *ngFor="let k of (resumen?.reservasPorUsuario | keyvalue)">
+            <li *ngFor="let k of (resumen.reservasPorUsuario | keyvalue)">
               {{k.key}}: {{k.value}}
             </li>
           </ul>
@@ -22,35 +25,35 @@
       <div class="col-md-6">
         <div class="p-3 border rounded">
           <div class="fw-bold">Asientos ocupados por clase</div>
-          <div>Negocios: {{resumen?.ocupadosPorClase?.Negocios}}</div>
-          <div>Económica: {{resumen?.ocupadosPorClase?.Economica}}</div>
+          <div>Negocios: {{resumen.ocupadosPorClase.Negocios}}</div>
+          <div>Económica: {{resumen.ocupadosPorClase.Economica}}</div>
         </div>
       </div>
       <div class="col-md-6">
         <div class="p-3 border rounded">
           <div class="fw-bold">Asientos libres por clase</div>
-          <div>Negocios: {{resumen?.libresPorClase?.Negocios}}</div>
-          <div>Económica: {{resumen?.libresPorClase?.Economica}}</div>
+          <div>Negocios: {{resumen.libresPorClase.Negocios}}</div>
+          <div>Económica: {{resumen.libresPorClase.Economica}}</div>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="p-3 border rounded">
           <div class="fw-bold">Selección</div>
-          <div>Manual: {{resumen?.seleccionManual}}</div>
-          <div>Aleatorio: {{resumen?.seleccionAleatorio}}</div>
+          <div>Manual: {{resumen.seleccionManual}}</div>
+          <div>Aleatorio: {{resumen.seleccionAleatorio}}</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="p-3 border rounded">
           <div class="fw-bold">Reservas modificadas</div>
-          <div>{{resumen?.modificados}}</div>
+          <div>{{resumen.modificados}}</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="p-3 border rounded">
           <div class="fw-bold">Reservas canceladas</div>
-          <div>{{resumen?.cancelados}}</div>
+          <div>{{resumen.cancelados}}</div>
         </div>
       </div>
     </div>
@@ -59,3 +62,49 @@
 <ng-template #loading>
   <div class="alert alert-secondary">Cargando reportes...</div>
 </ng-template>
+
+<!-- Modal: Diagrama de asientos -->
+<div class="modal fade show d-block" tabindex="-1" role="dialog" *ngIf="showSeatMapModal" style="background: rgba(0,0,0,.6);">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content brand-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Diagrama de asientos</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cerrarDiagrama()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="small text-muted mb-3">Libre en verde, ocupado en rojo. Vista de solo lectura.</div>
+        <div class="row g-4">
+          <div class="col-12 col-md-6">
+            <h6 class="mb-2">Negocios</h6>
+            <div class="modify-grid mx-auto">
+              <ng-container *ngFor="let r of businessRows">
+                <div class="modify-label">{{r}}</div>
+                <div class="d-flex gap-2 flex-wrap">
+                  <div *ngFor="let a of seatsByRow(r, 'Negocios')"
+                       [class]="'seat ' + (a.estado==='Ocupado' ? 'busy' : 'free')"
+                       [title]="a.numero + ' - ' + a.estado">{{a.numero}}</div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <h6 class="mb-2">Económica</h6>
+            <div class="modify-grid mx-auto">
+              <ng-container *ngFor="let r of economyRows">
+                <div class="modify-label">{{r}}</div>
+                <div class="d-flex gap-2 flex-wrap">
+                  <div *ngFor="let a of seatsByRow(r, 'Economica')"
+                       [class]="'seat ' + (a.estado==='Ocupado' ? 'busy' : 'free')"
+                       [title]="a.numero + ' - ' + a.estado">{{a.numero}}</div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-primary" (click)="cerrarDiagrama()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
