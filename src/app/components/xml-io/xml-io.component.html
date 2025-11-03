@@ -1,12 +1,12 @@
 ﻿<h3 class="mb-3">XML - Exportación e Importación</h3>
 <div class="card shadow-sm">
   <div class="card-body">
-    <div class="mb-3">
+    <div class="mb-3 d-flex flex-wrap gap-2">
       <button class="btn btn-primary me-2" (click)="exportar()">Exportar XML</button>
       <label class="btn btn-outline-primary mb-0">
         Importar XML <input type="file" accept=".xml" hidden (change)="importar($event)">
       </label>
-      <button class="btn btn-outline-danger ms-2" (click)="abrirPurgar()" title="Eliminar reservaciones y modificaciones (solo pruebas)">Borrar datos (pruebas)</button>
+      <button class="btn btn-outline-danger" (click)="abrirPurgar()" title="Eliminar reservaciones y modificaciones (solo pruebas)">Borrar datos (pruebas)</button>
     </div>
     <div *ngIf="resumen" class="alert alert-info">{{resumen}}</div>
     <div *ngIf="processingMs!=null" class="text-muted">Tiempo de procesamiento: {{processingMs}} ms</div>

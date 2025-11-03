@@ -119,6 +119,13 @@ body::after {
 .app-navbar .navbar-toggler { border-color: rgba(17,24,39,0.2); }
 .app-navbar .navbar-toggler-icon { filter: none; }
 
+/* Mobile navbar: use a pill highlight instead of underline to avoid overlap */
+@media (max-width: 576px) {
+  .app-navbar .nav-link.active::after { display: none; }
+  .app-navbar .nav-link.active { background-color: rgba(59,130,246,0.12); border-radius: .375rem; padding-left: .75rem; padding-right: .75rem; }
+  .app-navbar .navbar-collapse .nav-link { margin-bottom: .25rem; }
+}
+
 /* Logo size inside navbar */
 .brand-logo { height: 28px; width: auto; display: block; }
 

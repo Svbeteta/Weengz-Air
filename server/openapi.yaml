@@ -3,11 +3,32 @@ info:
   title: Weengz Air API
   version: 1.0.0
   description: |
-    REST API for Weengz Air reservations, users, and seats.
-    
-    Notes
-    - Dates are ISO-8601 strings (UTC) unless specified otherwise.
-    - Currency amounts are in Quetzales (Q).
+    API REST de Weengz Air para gestionar usuarios, asientos y reservaciones.
+
+    Características principales
+    - Reservaciones atómicas: `POST /reservaciones/atomic` valida que el asiento esté libre, aplica descuento VIP (si corresponde) y marca el asiento como Ocupado en una única transacción.
+    - Modificación de reserva: `POST /reservaciones/{id}/modificar` permite cambiar de asiento dentro de la misma cabina e incrementa el precio total con un recargo del 10% (se registra una Modificación).
+    - Cancelación con verificación de CUI: `POST /reservaciones/{id}/cancelar` cambia el estado a CANCELADA y libera el asiento.
+    - Confirmación individual y por lote: `POST /reservaciones/{id}/confirmar` y `POST /reservaciones/confirmar-lote` (este último envía un solo correo consolidado y suprime los correos individuales emitidos en paralelo).
+    - Documentación interactiva disponible en `/api-docs` (Swagger UI).
+
+    Correos transaccionales
+    - Se envían correos de confirmación y cancelación con una plantilla de marca común.
+    - La aplicación utiliza Nodemailer. Si no se configuran variables SMTP, se usa un buzón de prueba de Ethereal y el “preview URL” se imprime en la consola del servidor.
+    - Variables de entorno recomendadas: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`.
+
+    Herramientas de prueba y mantenimiento
+    - Purga de datos para entornos de prueba: `POST /admin/purge` elimina todas las reservaciones y modificaciones y libera los asientos. No modifica los usuarios. Devuelve conteos antes/después.
+
+    Convenciones de datos
+    - Fechas en formato ISO‑8601 (UTC), salvo que se indique lo contrario.
+    - Montos monetarios en Quetzales (Q).
+
+    Seguridad
+    - Este entorno de referencia no exige autenticación. En producción, proteja estos endpoints (p. ej. con JWT/API keys) y restrinja `/admin/purge` solo a administradores.
+
+    Notas
+    - Algunos detalles (p. ej. supresión de correos individuales tras confirmar en lote) se manejan en memoria y están pensados para un solo proceso en desarrollo.
 servers:
   - url: http://localhost:4000
     description: Local development
