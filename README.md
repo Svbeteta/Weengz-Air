@@ -1,3 +1,75 @@
+# Samuel Beteta — Personal Website
+
+This repository contains a simple static personal website (portfolio / "About me") for Samuel Beteta. The primary page is `index.html` at the repository root and includes information about studies, skills, projects and media samples.
+
+## What this site is
+
+- A lightweight, static HTML page built with Bootstrap 5 and Bootstrap Icons.
+- Intended to be hosted on GitHub Pages or any static hosting provider.
+- No build step or server-side code is required.
+
+## Download
+
+You can download or clone this repository with Git:
+
+```bash
+git clone https://github.com/Svbeteta/Weengz-Air.git
+cd Weengz-Air
+```
+
+## Run locally
+
+Since this is a static HTML page, there are multiple simple ways to open or serve it locally:
+
+- Open directly in a browser:
+
+  1. Double-click `index.html` or open it from your browser (`File → Open`).
+
+- Use Python built-in HTTP server (recommended for consistent behavior):
+
+  ```bash
+  # Python 3
+  python -m http.server 8000
+  # then open: http://localhost:8000/
+  ```
+
+- Use VS Code Live Server extension (if you use Visual Studio Code):
+  - Install Live Server, open the folder, right-click `index.html` → `Open with Live Server`.
+
+## Publish with GitHub Pages
+
+1. Push the repository to GitHub (if not already pushed):
+
+```bash
+git remote add origin https://github.com/Svbeteta/Weengz-Air.git
+git branch -M main
+git push -u origin main
+```
+
+2. In the repository on GitHub, go to `Settings` → `Pages`.
+   - Under "Build and deployment" choose "Deploy from a branch".
+   - Select `main` branch and folder `/ (root)` (or choose `/docs` if you place the site in `docs/`).
+   - Click Save. GitHub will publish the site and show the URL (usually `https://<username>.github.io/Weengz-Air/`).
+
+## File structure
+
+- `index.html` — main page (About / Projects / Media).
+- Other assets are loaded from external CDNs (Bootstrap, Bootstrap Icons) and remote media links.
+
+If you add local assets (images, videos, CSS), keep them in a clear folder structure such as `assets/` or `css/`.
+
+## Notes and recommendations
+
+- The page is static — for more complex functionality consider adding a small build step with a static site generator.
+- For mobile-friendliness, test the page at different viewport sizes and adjust Bootstrap classes if necessary.
+
+## License
+
+This repository does not include a license file. Add a `LICENSE` if you want to make reuse terms explicit (e.g., MIT).
+
+## Contact
+
+Samuel Beteta — see the GitHub profile: https://github.com/Svbeteta
 # WeengzAir
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.4.
